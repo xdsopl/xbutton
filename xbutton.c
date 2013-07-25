@@ -68,6 +68,24 @@ int XNextEvent(Display *d, XEvent *e)
 	return r;
 }
 
+int XResizeWindow(Display *display, Window w, unsigned int width, unsigned int height)
+{
+	static int (*real_XResizeWindow)(Display *, Window, unsigned int, unsigned int);
+	if (!real_XResizeWindow)
+		real_XResizeWindow = dlsym(RTLD_NEXT, "XResizeWindow");
+	fprintf(stderr, "Xlib: resize window %d %d\n", width, height);
+	return real_XResizeWindow(display, w, width, height);
+}
+
+int XMoveResizeWindow(Display *display, Window w, int x, int y, unsigned int width, unsigned int height)
+{
+	static int (*real_XMoveResizeWindow)(Display *, Window, int, int, unsigned int, unsigned int);
+	if (!real_XMoveResizeWindow)
+		real_XMoveResizeWindow = dlsym(RTLD_NEXT, "XMoveResizeWindow");
+	fprintf(stderr, "Xlib: move resize window %d %d %d %d\n", x, y, width, height);
+	return real_XMoveResizeWindow(display, w, x, y, width, height);
+}
+
 Window XCreateWindow(Display *display, Window parent, int x, int y, unsigned int width, unsigned int height, unsigned int border_width, int depth, unsigned int class, Visual *visual, unsigned long valuemask, XSetWindowAttributes *attributes)
 {
 	static Window (*real_XCreateWindow)(Display *, Window, int, int, unsigned int, unsigned int, unsigned int, int, unsigned int, Visual *, unsigned long, XSetWindowAttributes *);
