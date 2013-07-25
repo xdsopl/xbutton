@@ -26,7 +26,7 @@ xcb_generic_event_t *xcb_poll_for_event(xcb_connection_t *c)
 	xcb_generic_event_t *e = real_xcb_poll_for_event(c);
 	if (e && XCB_BUTTON_PRESS == e->response_type) {
 		xcb_button_press_event_t *ev = (xcb_button_press_event_t *)e;
-		fprintf(stderr, "Xlib: button press %d %d\n", ev->event_x, ev->event_y);
+		fprintf(stderr, "XCB: button press %d %d\n", ev->event_x, ev->event_y);
 		xbutton(ev->event_x, ev->event_y);
 	}
 	return e;
@@ -39,6 +39,19 @@ xcb_void_cookie_t xcb_create_window(xcb_connection_t *c, uint8_t depth, xcb_wind
 		real_xcb_create_window = dlsym(RTLD_NEXT, "xcb_create_window");
 	fprintf(stderr, "XCB: create window %d %d\n", width, height);
 	return real_xcb_create_window(c, depth, wid, parent, x, y, width, height, border_width, _class, visual, value_mask, value_list);
+}
+
+int XNextEvent(Display *d, XEvent *e)
+{
+	static int (*real_XNextEvent)(Display *, XEvent *);
+	if (!real_XNextEvent)
+		real_XNextEvent = dlsym(RTLD_NEXT, "XNextEvent");
+	int r = real_XNextEvent(d, e);
+	if (e && ButtonPress == e->type) {
+		fprintf(stderr, "Xlib: button press %d %d\n", e->xbutton.x, e->xbutton.y);
+		xbutton(e->xbutton.x, e->xbutton.y);
+	}
+	return r;
 }
 
 Window XCreateWindow(Display *display, Window parent, int x, int y, unsigned int width, unsigned int height, unsigned int border_width, int depth, unsigned int class, Visual *visual, unsigned long valuemask, XSetWindowAttributes *attributes)
