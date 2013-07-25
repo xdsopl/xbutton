@@ -96,6 +96,18 @@ int XMoveResizeWindow(Display *display, Window w, int x, int y, unsigned int wid
 	return real_XMoveResizeWindow(display, w, x, y, width, height);
 }
 
+int XConfigureWindow(Display *display, Window w, unsigned int value_mask, XWindowChanges *values)
+{
+	static int (*real_XConfigureWindow)(Display *, Window, unsigned int, XWindowChanges *);
+	if (!real_XConfigureWindow)
+		real_XConfigureWindow = dlsym(RTLD_NEXT, "XConfigureWindow");
+	if (value_mask & CWWidth)
+		fprintf(stderr, "Xlib: configure window width %d\n", values->width);
+	if (value_mask & CWHeight)
+		fprintf(stderr, "Xlib: configure window height %d\n", values->height);
+	return real_XConfigureWindow(display, w, value_mask, values);
+}
+
 Window XCreateWindow(Display *display, Window parent, int x, int y, unsigned int width, unsigned int height, unsigned int border_width, int depth, unsigned int class, Visual *visual, unsigned long valuemask, XSetWindowAttributes *attributes)
 {
 	static Window (*real_XCreateWindow)(Display *, Window, int, int, unsigned int, unsigned int, unsigned int, int, unsigned int, Visual *, unsigned long, XSetWindowAttributes *);
