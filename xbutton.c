@@ -32,6 +32,20 @@ xcb_generic_event_t *xcb_poll_for_event(xcb_connection_t *c)
 	return e;
 }
 
+xcb_generic_event_t *xcb_wait_for_event(xcb_connection_t *c)
+{
+	static xcb_generic_event_t *(*real_xcb_wait_for_event)(xcb_connection_t *);
+	if (!real_xcb_wait_for_event)
+		real_xcb_wait_for_event = dlsym(RTLD_NEXT, "xcb_wait_for_event");
+	xcb_generic_event_t *e = real_xcb_wait_for_event(c);
+	if (XCB_BUTTON_PRESS == e->response_type) {
+		xcb_button_press_event_t *ev = (xcb_button_press_event_t *)e;
+		fprintf(stderr, "XCB: button press %d %d\n", ev->event_x, ev->event_y);
+		xbutton(ev->event_x, ev->event_y);
+	}
+	return e;
+}
+
 xcb_void_cookie_t xcb_create_window(xcb_connection_t *c, uint8_t depth, xcb_window_t wid, xcb_window_t parent, int16_t x, int16_t y, uint16_t width, uint16_t height, uint16_t border_width, uint16_t _class, xcb_visualid_t visual, uint32_t value_mask, const uint32_t *value_list)
 {
 	static xcb_void_cookie_t (*real_xcb_create_window)(xcb_connection_t *, uint8_t, xcb_window_t, xcb_window_t, int16_t, int16_t, uint16_t, uint16_t, uint16_t, uint16_t, xcb_visualid_t, uint32_t, const uint32_t *);
