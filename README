@@ -1,0 +1,11 @@
+
+xbutton - add x button via ld_preload to kill application
+Written in 2013 by <Ahmet Inan> <ainan@mathematik.uni-freiburg.de>
+To the extent possible under law, the author(s) have dedicated all copyright and related and neighboring rights to this software to the public domain worldwide. This software is distributed without any warranty.
+You should have received a copy of the CC0 Public Domain Dedication along with this software. If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
+
+this tool can be used to add a quit (kill) button to applications, that dont have it.
+
+Usage:
+# LD_PRELOAD=./xbutton.so COMMAND
+
