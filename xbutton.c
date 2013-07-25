@@ -71,7 +71,13 @@ int XNextEvent(Display *d, XEvent *e)
 	if (!real_XNextEvent)
 		real_XNextEvent = dlsym(RTLD_NEXT, "XNextEvent");
 	int r = real_XNextEvent(d, e);
-	if (e && ButtonPress == e->type) {
+	if (!e)
+		return r;
+	if (ConfigureNotify == e->type) {
+		fprintf(stderr, "Xlib: configure notify %d %d\n", e->xconfigure.width, e->xconfigure.height);
+		xbutton(e->xconfigure.width, e->xconfigure.height);
+	}
+	if (ButtonPress == e->type) {
 		fprintf(stderr, "Xlib: button press %d %d\n", e->xbutton.x, e->xbutton.y);
 		xbutton(e->xbutton.x, e->xbutton.y);
 	}
