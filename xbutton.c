@@ -46,6 +46,16 @@ xcb_generic_event_t *xcb_wait_for_event(xcb_connection_t *c)
 	return e;
 }
 
+xcb_void_cookie_t xcb_configure_window(xcb_connection_t *c, xcb_window_t window, uint16_t value_mask, const uint32_t *value_list)
+{
+	static xcb_void_cookie_t (*real_xcb_configure_window)(xcb_connection_t *, xcb_window_t, uint16_t, const uint32_t *);
+	if (!real_xcb_configure_window)
+		real_xcb_configure_window = dlsym(RTLD_NEXT, "xcb_configure_window");
+	if (value_mask & (XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT))
+		fprintf(stderr, "XCB: configure window\n");
+	return real_xcb_configure_window(c, window, value_mask, value_list);
+}
+
 xcb_void_cookie_t xcb_create_window(xcb_connection_t *c, uint8_t depth, xcb_window_t wid, xcb_window_t parent, int16_t x, int16_t y, uint16_t width, uint16_t height, uint16_t border_width, uint16_t _class, xcb_visualid_t visual, uint32_t value_mask, const uint32_t *value_list)
 {
 	static xcb_void_cookie_t (*real_xcb_create_window)(xcb_connection_t *, uint8_t, xcb_window_t, xcb_window_t, int16_t, int16_t, uint16_t, uint16_t, uint16_t, uint16_t, xcb_visualid_t, uint32_t, const uint32_t *);
