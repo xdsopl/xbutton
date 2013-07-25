@@ -10,7 +10,6 @@ You should have received a copy of the CC0 Public Domain Dedication along with t
 #include <stdio.h>
 #include <stdlib.h>
 #include <xcb/xcb.h>
-#include <X11/Xlib.h>
 
 static void xbutton(int x, int y)
 {
@@ -29,16 +28,5 @@ xcb_generic_event_t *xcb_poll_for_event(xcb_connection_t *c)
 		xbutton(ev->event_x, ev->event_y);
 	}
 	return e;
-}
-
-int XNextEvent(Display *d, XEvent *e)
-{
-	static int (*real_XNextEvent)(Display *, XEvent *);
-	if (!real_XNextEvent)
-		real_XNextEvent = dlsym(RTLD_NEXT, "XNextEvent");
-	int r = real_XNextEvent(d, e);
-	if (e && ButtonPress == e->type)
-		xbutton(e->xbutton.x, e->xbutton.y);
-	return r;
 }
 
