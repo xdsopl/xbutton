@@ -89,10 +89,32 @@ int XNextEvent(Display *d, XEvent *e)
 	int r = real_XNextEvent(d, e);
 	if (!e)
 		return r;
-	if (ConfigureNotify == e->type)
-		resize_window(e->xbutton.window, e->xconfigure.width, e->xconfigure.height);
-	if (ButtonPress == e->type)
-		button_press(e->xbutton.window, e->xbutton.x, e->xbutton.y);
+	switch (e->type) {
+		case ButtonPress:
+			button_press(e->xbutton.window, e->xbutton.x, e->xbutton.y);
+			break;
+		case ConfigureNotify:
+			resize_window(e->xconfigure.window, e->xconfigure.width, e->xconfigure.height);
+			break;
+		case CreateNotify:
+			resize_window(e->xcreatewindow.window, e->xcreatewindow.width, e->xcreatewindow.height);
+			break;
+		case ConfigureRequest:
+			resize_window(e->xconfigure.window, e->xconfigure.width, e->xconfigure.height);
+			break;
+		case ResizeRequest:
+			resize_window(e->xresizerequest.window, e->xresizerequest.width, e->xresizerequest.height);
+			break;
+	}
 	return r;
+}
+
+int XResizeWindow(Display *display, Window w, unsigned int width, unsigned int height)
+{
+	static int (*real_XResizeWindow)(Display *, Window, unsigned int, unsigned int);
+	if (!real_XResizeWindow)
+		real_XResizeWindow = dlsym(RTLD_NEXT, "XResizeWindow");
+	resize_window(w, width, height);
+	return real_XResizeWindow(display, w, width, height);
 }
 
