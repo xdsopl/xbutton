@@ -10,9 +10,9 @@ minimal usage:
 # LD_PRELOAD=./xbutton.so COMMAND
 
 all options:
-# XBUTTON_CORNER={NW,NE,SW,SE} XBUTTON_R2=NUM XBUTTON_RESIZE={first,max,always} LD_PRELOAD=./xbutton.so COMMAND
+# XBUTTON_CORNER={NW,NE,SW,SE} XBUTTON_R=NUM XBUTTON_RESIZE={first,max,always} LD_PRELOAD=./xbutton.so COMMAND
 
-XBUTTON_R2 is radius in pixels of xbutton squared.
+XBUTTON_R is radius in pixels of xbutton.
 
 kill xterm when clicking to upper right corner:
 # LD_PRELOAD=./xbutton.so xterm

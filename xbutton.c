@@ -14,12 +14,12 @@ You should have received a copy of the CC0 Public Domain Dedication along with t
 
 static int bx;
 static int by;
-static int r2 = 1024;
+static int radius = 32;
 
 static void button_press(Window window, int x, int y)
 {
 	fprintf(stderr, "button press %d %d %d\n", (unsigned)window, x, y);
-	if ((x-bx)*(x-bx)+(y-by)*(y-by) < r2) {
+	if ((x-bx)*(x-bx)+(y-by)*(y-by) < radius*radius) {
 		fprintf(stderr, "killing app\n");
 		exit(0);
 	}
@@ -54,13 +54,13 @@ static void resize_window(Window window, int width, int height)
 				fprintf(stderr, "ignoring ");
 			fprintf(stderr, "XBUTTON_RESIZE=%s\n", str);
 		}
-		if ((str = getenv("XBUTTON_R2"))) {
+		if ((str = getenv("XBUTTON_R"))) {
 			int tmp = atoi(str);
 			if (tmp > 0) {
-				r2 = tmp;
-				fprintf(stderr, "XBUTTON_R2=%d\n", r2);
+				radius = tmp;
+				fprintf(stderr, "XBUTTON_R=%d\n", radius);
 			} else {
-				fprintf(stderr, "ignoring XBUTTON_R2=%s\n", str);
+				fprintf(stderr, "ignoring XBUTTON_R=%s\n", str);
 			}
 		}
 	}
