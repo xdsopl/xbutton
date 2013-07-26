@@ -7,6 +7,7 @@ You should have received a copy of the CC0 Public Domain Dedication along with t
 */
 
 #include <dlfcn.h>
+#include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <X11/Xlib.h>
@@ -26,15 +27,58 @@ static void button_press(Window window, int x, int y)
 
 static void resize_window(Window window, int width, int height)
 {
-	static Window first_window;
-	if (first_window && first_window != window) {
-		fprintf(stderr, "ignoring new window resize %d %d %d\n", (unsigned)window, width, height);
-		return;
-	}
-	first_window = window;
-	bx = width;
-//	by = height;
 	fprintf(stderr, "resize window %d %d %d\n", (unsigned)window, width, height);
+	static int corner = 1, init, resize_first, resize_max;
+	if (!init) {
+		init = 1;
+		char *str;
+		if ((str = getenv("XBUTTON_CORNER"))) {
+			if (!strcmp(str, "NW"))
+				corner = 0;
+			else if (!strcmp(str, "NE"))
+				corner = 1;
+			else if (!strcmp(str, "SW"))
+				corner = 2;
+			else if (!strcmp(str, "SE"))
+				corner = 3;
+			else
+				fprintf(stderr, "ignoring ");
+			fprintf(stderr, "XBUTTON_CORNER=%s\n", str);
+		}
+		if ((str = getenv("XBUTTON_RESIZE"))) {
+			if (!strcmp(str, "first"))
+				resize_first = 1;
+			else if (!strcmp(str, "max"))
+				resize_max = 1;
+			else
+				fprintf(stderr, "ignoring ");
+			fprintf(stderr, "XBUTTON_RESIZE=%s\n", str);
+		}
+		if ((str = getenv("XBUTTON_R2"))) {
+			int tmp = atoi(str);
+			if (tmp > 0) {
+				r2 = tmp;
+				fprintf(stderr, "XBUTTON_R2=%d\n", r2);
+			} else {
+				fprintf(stderr, "ignoring XBUTTON_R2=%s\n", str);
+			}
+		}
+	}
+	if (resize_first) {
+		static Window first_window;
+		if (first_window && first_window != window) {
+			fprintf(stderr, "ignoring new window resize %d %d %d\n", (unsigned)window, width, height);
+			return;
+		}
+		first_window = window;
+	} else if (resize_max) {
+		static int last_width, last_height;
+		last_width = width = last_width > width ? last_width : width;
+		last_height = height = last_height > height ? last_height : height;
+	}
+	bx = corner & 1 ? width - 1 : 0;
+	by = corner & 2 ? height - 1 : 0;
+	fprintf(stderr, "new xbutton position %d %d\n", bx, by);
 }
 
 int XNextEvent(Display *d, XEvent *e)

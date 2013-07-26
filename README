@@ -6,9 +6,23 @@ You should have received a copy of the CC0 Public Domain Dedication along with t
 
 this tool can be used to add a quit (kill) button to applications, that dont have it.
 
-Usage:
+minimal usage:
 # LD_PRELOAD=./xbutton.so COMMAND
 
+all options:
+# XBUTTON_CORNER={NW,NE,SW,SE} XBUTTON_R2=NUM XBUTTON_RESIZE={first,max,always} LD_PRELOAD=./xbutton.so COMMAND
+
+XBUTTON_R2 is radius in pixels of xbutton squared.
+
 kill xterm when clicking to upper right corner:
-LD_PRELOAD=./xbutton.so xterm
+# LD_PRELOAD=./xbutton.so xterm
+
+place xbutton to lower left corner:
+# XBUTTON_CORNER=SW LD_PRELOAD=./xbutton.so terminal
+
+track resize of only first created window:
+# XBUTTON_RESIZE=first LD_PRELOAD=./xbutton.so firefox
+
+track all window resizes and take maximum:
+# XBUTTON_RESIZE=max LD_PRELOAD=./xbutton.so javaws -about
 
