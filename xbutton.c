@@ -109,6 +109,19 @@ int XNextEvent(Display *d, XEvent *e)
 	return r;
 }
 
+int XDrawLines(Display *display, Drawable d, GC gc, XPoint *points, int npoints, int mode)
+{
+	static int (*real_XDrawLines)(Display *, Drawable, GC, XPoint *, int, int);
+	if (!real_XDrawLines)
+		real_XDrawLines = dlsym(RTLD_NEXT, "XDrawLines");
+	int r = real_XDrawLines(display, d, gc, points, npoints, mode);
+	fprintf(stderr, "XDrawLines\n");
+	int x = bx < radius*2 ? radius : bx - radius;
+	int y = by < radius*2 ? radius : by - radius;
+	XDrawString(display, d, gc, x, y, "[x]", 3);
+	return r;
+}
+
 int XResizeWindow(Display *display, Window w, unsigned int width, unsigned int height)
 {
 	static int (*real_XResizeWindow)(Display *, Window, unsigned int, unsigned int);
