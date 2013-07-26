@@ -9,6 +9,6 @@ this tool can be used to add a quit (kill) button to applications, that dont hav
 Usage:
 # LD_PRELOAD=./xbutton.so COMMAND
 
-kill xterm when clicking to upper left corner:
+kill xterm when clicking to upper right corner:
 LD_PRELOAD=./xbutton.so xterm
 
