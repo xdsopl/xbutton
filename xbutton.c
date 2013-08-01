@@ -16,6 +16,13 @@ static int bx;
 static int by;
 static int radius = 32;
 
+static void draw_xbutton(Display *display, Drawable d, GC gc)
+{
+	int x = bx < radius*2 ? radius : bx - radius;
+	int y = by < radius*2 ? radius : by - radius;
+	XDrawString(display, d, gc, x, y, "[x]", 3);
+}
+
 static void button_press(Window window, int x, int y)
 {
 	fprintf(stderr, "button press %d %d %d\n", (unsigned)window, x, y);
@@ -109,19 +116,6 @@ int XNextEvent(Display *d, XEvent *e)
 	return r;
 }
 
-int XDrawLines(Display *display, Drawable d, GC gc, XPoint *points, int npoints, int mode)
-{
-	static int (*real_XDrawLines)(Display *, Drawable, GC, XPoint *, int, int);
-	if (!real_XDrawLines)
-		real_XDrawLines = dlsym(RTLD_NEXT, "XDrawLines");
-	int r = real_XDrawLines(display, d, gc, points, npoints, mode);
-	fprintf(stderr, "XDrawLines\n");
-	int x = bx < radius*2 ? radius : bx - radius;
-	int y = by < radius*2 ? radius : by - radius;
-	XDrawString(display, d, gc, x, y, "[x]", 3);
-	return r;
-}
-
 int XResizeWindow(Display *display, Window w, unsigned int width, unsigned int height)
 {
 	static int (*real_XResizeWindow)(Display *, Window, unsigned int, unsigned int);
@@ -129,5 +123,49 @@ int XResizeWindow(Display *display, Window w, unsigned int width, unsigned int h
 		real_XResizeWindow = dlsym(RTLD_NEXT, "XResizeWindow");
 	resize_window(w, width, height);
 	return real_XResizeWindow(display, w, width, height);
+}
+
+int XDrawLines(Display *display, Drawable d, GC gc, XPoint *points, int npoints, int mode)
+{
+	static int (*real_XDrawLines)(Display *, Drawable, GC, XPoint *, int, int);
+	if (!real_XDrawLines)
+		real_XDrawLines = dlsym(RTLD_NEXT, "XDrawLines");
+	int r = real_XDrawLines(display, d, gc, points, npoints, mode);
+	fprintf(stderr, "XDrawLines\n");
+	draw_xbutton(display, d, gc);
+	return r;
+}
+
+int XPutImage(Display *display, Drawable d, GC gc, XImage *image, int src_x, int src_y, int dest_x, int dest_y, unsigned int width, unsigned int height)
+{
+	static int (*real_XPutImage)(Display *, Drawable, GC, XImage *, int, int, int, int, unsigned int, unsigned int);
+	if (!real_XPutImage)
+		real_XPutImage = dlsym(RTLD_NEXT, "XPutImage");
+	int r = real_XPutImage(display, d, gc, image, src_x, src_y, dest_x, dest_y, width, height);
+	fprintf(stderr, "XPutImage\n");
+	draw_xbutton(display, d, gc);
+	return r;
+}
+
+int XCopyArea(Display *display, Drawable src, Drawable dest, GC gc, int src_x, int src_y, unsigned int width, unsigned int height, int dest_x, int dest_y)
+{
+	static int (*real_XCopyArea)(Display *, Drawable, Drawable, GC, int, int, unsigned int, unsigned int, int, int);
+	if (!real_XCopyArea)
+		real_XCopyArea = dlsym(RTLD_NEXT, "XCopyArea");
+	int r = real_XCopyArea(display, src, dest, gc, src_x, src_y, width, height, dest_x, dest_y);
+	fprintf(stderr, "XCopyArea\n");
+	draw_xbutton(display, dest, gc);
+	return r;
+}
+
+int XCopyPlane(Display *display, Drawable src, Drawable dest, GC gc, int src_x, int src_y, unsigned int width, unsigned int height, int dest_x, int dest_y, unsigned long plane)
+{
+	static int (*real_XCopyPlane)(Display *, Drawable, Drawable, GC, int, int, unsigned int, unsigned int, int, int, unsigned long);
+	if (!real_XCopyPlane)
+		real_XCopyPlane = dlsym(RTLD_NEXT, "XCopyPlane");
+	int r = real_XCopyPlane(display, src, dest, gc, src_x, src_y, width, height, dest_x, dest_y, plane);
+	fprintf(stderr, "XCopyPlane\n");
+	draw_xbutton(display, dest, gc);
+	return r;
 }
 
