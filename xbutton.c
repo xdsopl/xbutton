@@ -88,7 +88,7 @@ static void resize_window(Window window, int width, int height)
 				debug = 1;
 				msg("XBUTTON_DEBUG=1\n");
 			} else {
-				msg("ignoring XBUTTON_R=%s\n", str);
+				msg("ignoring XBUTTON_DEBUG=%s\n", str);
 			}
 		}
 	}
