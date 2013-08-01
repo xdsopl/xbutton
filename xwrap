@@ -1,0 +1,26 @@
+#! /bin/bash
+#Written in 2013 by <Ahmet Inan> <ainan@mathematik.uni-freiburg.de>
+
+func_decl=$(sed 's@^\s*@@;s@ \*/@@;s@\s*/\* @ @;s@\* @ *@;s@,@, @;s@^extern @@;s@;@@' | tr -d \\n)
+
+func_name=${func_decl%%(*}
+func_name=${func_name##* }
+real_func=real_$func_name
+
+static_decl=$(echo $func_decl | sed 's@*@* @g;s@ [^ ,)]*\([,)]\)@\1@g')
+static_decl=${static_decl/${func_name}/(*${real_func})}
+
+return_real=$real_func"("${func_decl##*(}
+return_real=$(echo $return_real | sed 's@\((\|, \)[^,)]* @\1@g;s@*@@g')
+
+cat << EOF
+$func_decl
+{
+	static $static_decl;
+	if (!$real_func)
+		$real_func = dlsym(RTLD_NEXT, "$func_name");
+	fprintf(stderr, "$func_name\n");
+	return $return_real;
+}
+EOF
+
