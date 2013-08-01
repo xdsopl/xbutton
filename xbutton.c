@@ -10,11 +10,23 @@ You should have received a copy of the CC0 Public Domain Dedication along with t
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include <X11/Xlib.h>
 
 static int bx;
 static int by;
 static int radius = 32;
+static int debug;
+
+static void msg(char *fmt, ...)
+{
+	if (!debug)
+		return;
+	va_list args;
+	va_start(args, fmt);
+	vfprintf(stderr, fmt, args);
+	va_end(args);
+}
 
 static void draw_xbutton(Display *display, Drawable d, GC gc)
 {
@@ -25,16 +37,16 @@ static void draw_xbutton(Display *display, Drawable d, GC gc)
 
 static void button_press(Window window, int x, int y)
 {
-	fprintf(stderr, "button press %d %d %d\n", (unsigned)window, x, y);
+	msg("button press %d %d %d\n", (unsigned)window, x, y);
 	if ((x-bx)*(x-bx)+(y-by)*(y-by) < radius*radius) {
-		fprintf(stderr, "killing app\n");
+		msg("killing app\n");
 		exit(0);
 	}
 }
 
 static void resize_window(Window window, int width, int height)
 {
-	fprintf(stderr, "resize window %d %d %d\n", (unsigned)window, width, height);
+	msg("resize window %d %d %d\n", (unsigned)window, width, height);
 	static int corner = 1, init, resize_first, resize_max;
 	if (!init) {
 		init = 1;
@@ -49,8 +61,8 @@ static void resize_window(Window window, int width, int height)
 			else if (!strcmp(str, "SE"))
 				corner = 3;
 			else
-				fprintf(stderr, "ignoring ");
-			fprintf(stderr, "XBUTTON_CORNER=%s\n", str);
+				msg("ignoring ");
+			msg("XBUTTON_CORNER=%s\n", str);
 		}
 		if ((str = getenv("XBUTTON_RESIZE"))) {
 			if (!strcmp(str, "first"))
@@ -58,23 +70,32 @@ static void resize_window(Window window, int width, int height)
 			else if (!strcmp(str, "max"))
 				resize_max = 1;
 			else
-				fprintf(stderr, "ignoring ");
-			fprintf(stderr, "XBUTTON_RESIZE=%s\n", str);
+				msg("ignoring ");
+			msg("XBUTTON_RESIZE=%s\n", str);
 		}
 		if ((str = getenv("XBUTTON_R"))) {
 			int tmp = atoi(str);
 			if (tmp > 0) {
 				radius = tmp;
-				fprintf(stderr, "XBUTTON_R=%d\n", radius);
+				msg("XBUTTON_R=%d\n", radius);
 			} else {
-				fprintf(stderr, "ignoring XBUTTON_R=%s\n", str);
+				msg("ignoring XBUTTON_R=%s\n", str);
+			}
+		}
+		if ((str = getenv("XBUTTON_DEBUG"))) {
+			int tmp = atoi(str);
+			if (1 == tmp) {
+				debug = 1;
+				msg("XBUTTON_DEBUG=1\n");
+			} else {
+				msg("ignoring XBUTTON_R=%s\n", str);
 			}
 		}
 	}
 	if (resize_first) {
 		static Window first_window;
 		if (first_window && first_window != window) {
-			fprintf(stderr, "ignoring new window resize %d %d %d\n", (unsigned)window, width, height);
+			msg("ignoring new window resize %d %d %d\n", (unsigned)window, width, height);
 			return;
 		}
 		first_window = window;
@@ -85,7 +106,7 @@ static void resize_window(Window window, int width, int height)
 	}
 	bx = corner & 1 ? width - 1 : 0;
 	by = corner & 2 ? height - 1 : 0;
-	fprintf(stderr, "new xbutton position %d %d\n", bx, by);
+	msg("new xbutton position %d %d\n", bx, by);
 }
 
 int XNextEvent(Display *d, XEvent *e)
@@ -131,7 +152,7 @@ int XDrawLines(Display *display, Drawable d, GC gc, XPoint *points, int npoints,
 	if (!real_XDrawLines)
 		real_XDrawLines = dlsym(RTLD_NEXT, "XDrawLines");
 	int r = real_XDrawLines(display, d, gc, points, npoints, mode);
-	fprintf(stderr, "XDrawLines\n");
+	msg("XDrawLines\n");
 	draw_xbutton(display, d, gc);
 	return r;
 }
@@ -142,7 +163,7 @@ int XPutImage(Display *display, Drawable d, GC gc, XImage *image, int src_x, int
 	if (!real_XPutImage)
 		real_XPutImage = dlsym(RTLD_NEXT, "XPutImage");
 	int r = real_XPutImage(display, d, gc, image, src_x, src_y, dest_x, dest_y, width, height);
-	fprintf(stderr, "XPutImage\n");
+	msg("XPutImage\n");
 	draw_xbutton(display, d, gc);
 	return r;
 }
@@ -153,7 +174,7 @@ int XCopyArea(Display *display, Drawable src, Drawable dest, GC gc, int src_x, i
 	if (!real_XCopyArea)
 		real_XCopyArea = dlsym(RTLD_NEXT, "XCopyArea");
 	int r = real_XCopyArea(display, src, dest, gc, src_x, src_y, width, height, dest_x, dest_y);
-	fprintf(stderr, "XCopyArea\n");
+	msg("XCopyArea\n");
 	draw_xbutton(display, dest, gc);
 	return r;
 }
@@ -164,7 +185,7 @@ int XCopyPlane(Display *display, Drawable src, Drawable dest, GC gc, int src_x, 
 	if (!real_XCopyPlane)
 		real_XCopyPlane = dlsym(RTLD_NEXT, "XCopyPlane");
 	int r = real_XCopyPlane(display, src, dest, gc, src_x, src_y, width, height, dest_x, dest_y, plane);
-	fprintf(stderr, "XCopyPlane\n");
+	msg("XCopyPlane\n");
 	draw_xbutton(display, dest, gc);
 	return r;
 }

@@ -10,7 +10,7 @@ minimal usage:
 # LD_PRELOAD=./xbutton.so COMMAND
 
 all options:
-# XBUTTON_CORNER={NW,NE,SW,SE} XBUTTON_R=NUM XBUTTON_RESIZE={first,max,always} LD_PRELOAD=./xbutton.so COMMAND
+# XBUTTON_DEBUG={0,1} XBUTTON_CORNER={NW,NE,SW,SE} XBUTTON_R=NUM XBUTTON_RESIZE={first,max,always} LD_PRELOAD=./xbutton.so COMMAND
 
 XBUTTON_R is radius in pixels of xbutton.
 
@@ -25,4 +25,7 @@ track resize of only first created window:
 
 track all window resizes and take maximum:
 # XBUTTON_RESIZE=max LD_PRELOAD=./xbutton.so javaws -about
+
+be verbose:
+# XBUTTON_DEBUG=1 LD_PRELOAD=./xbutton.so ./SURFER
 

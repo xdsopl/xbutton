@@ -19,7 +19,7 @@ $func_decl
 	static $static_decl;
 	if (!$real_func)
 		$real_func = dlsym(RTLD_NEXT, "$func_name");
-	fprintf(stderr, "$func_name\n");
+	msg("$func_name\n");
 	return $return_real;
 }
 EOF
